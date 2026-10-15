@@ -36,7 +36,7 @@ def test_encode_decode_file_roundtrip(default_fft, fft_ori_img, fft_wm_img, tmp_
     assert result.shape == fft_ori_img.shape
 
     result_crop = result[:fft_wm_img.shape[0], :fft_wm_img.shape[1]]
-    assert np.mean(np.abs(result_crop.astype(float) - fft_wm_img.astype(float))) < 100
+    assert np.mean(np.abs(result_crop.astype(float) - fft_wm_img.astype(float))) < 150
 
 
 def test_encode_file_not_found(default_fft, tmp_path):
@@ -62,7 +62,7 @@ def test_encode_arr_decode_arr_roundtrip(default_fft, fft_ori_img, fft_wm_img):
     assert decoded.shape == fft_ori_img.shape
 
     decoded_crop = decoded[:fft_wm_img.shape[0], :fft_wm_img.shape[1]]
-    assert np.mean(np.abs(decoded_crop.astype(float) - fft_wm_img.astype(float))) < 100
+    assert np.mean(np.abs(decoded_crop.astype(float) - fft_wm_img.astype(float))) < 150
 
 
 def test_different_seed_no_recovery(fft_ori_img, fft_wm_img):

@@ -78,12 +78,12 @@ def fft_decode(img, img_wm, seed=20160930, alpha=3.0, oldseed=False):
     f2 = np.fft.fft2(img_wm)
     rwm = np.real((f2 - f1) / alpha)
 
-    wm_out = np.zeros_like(rwm)
+    wm_out = np.zeros(rwm.shape, dtype=np.uint8)
     for i in range(half_H):
         for j in range(W):
-            wm_out[m[i], n[j]] = rwm[i, j]
+            wm_out[m[i], n[j]] = np.uint8(rwm[i, j])
     for i in range(half_H):
         for j in range(W):
             wm_out[H - i - 1, W - j - 1] = wm_out[i, j]
 
-    return np.clip(wm_out, 0, 255).astype(np.uint8)
+    return wm_out
