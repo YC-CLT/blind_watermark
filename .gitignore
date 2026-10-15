@@ -2,3 +2,4 @@
 docs/superpowers/
 .trae
 .vscode
+__pycache__

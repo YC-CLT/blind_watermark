@@ -8,7 +8,7 @@ version = "0.4.4"
 description = "Blind Watermark in Python"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 authors = [
     {name = "Guo Fei", email = "guofei9987@foxmail.com"},
 ]
@@ -40,7 +40,7 @@ blind_watermark = "blind_watermark.cli_tools:main"
 [tool.hatch.build.targets.wheel]
 packages = ["blind_watermark"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "ipykernel",
 ]
