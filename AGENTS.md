@@ -2,20 +2,30 @@
 
 ## 环境
 
-- Python 3.11，uv 管理依赖
-- config.py 集中配置所有常量，pyproject.toml 管理依赖
+- Python 3.13.14，uv 管理依赖
+- pyproject.toml 管理依赖和入口点，`[dependency-groups].dev`（非废弃的 `tool.uv.dev-dependencies`）
 - **命令**：用 `cmd-exec-mcp`
 
 ## 关键文件
 
+| 文件 | 作用 |
+|------|------|
+| `pyproject.toml` | uv 项目配置、依赖、entry point |
+| `blind_watermark/blind_watermark.py` | WaterMark 主类，embed/extract 入口 |
+| `blind_watermark/bwm_core.py` | 盲水印核心算法 |
+| `blind_watermark/cli_tools.py` | CLI 命令行工具 |
+
 ## 关键常量
+
+| 常量 | 位置 | 说明 |
+|------|------|------|
+| `__version__` | `blind_watermark/version.py` | 版本号，pyproject.toml 中需同步 |
 
 ## 规则
 
-- **monkeypatch 必须用 `import config` + `config.X`**：`from config import X` 创建本地副本，monkeypatch 无法穿透；executor 同理 patch `executors.模块名.X`
-- **executor 签名变更需全链同步**：方法签名变，main.py 工具、测试、同接口其他 executor 都改
-- **config 重命名全量 grep**：常量改名/移除后搜索所有引用
-- **跨 Task 依赖等待**：并行派发时先检查上游产物是否存在
+- **CLI 入口点必须有 `if __name__ == '__main__'`**：否则 `python -m` 模式不工作；entry point 虽然能走，但 `-m` 是重要调试通道
+- **只用 pyproject.toml 管依赖**：不要再建 requirements.txt 或 setup.py
+- **block_shape 传参必须 tuple**：argparse 吐出 list，需 `tuple(args.block_shape)` 转换
 
 ## 查文献指南
 
@@ -42,4 +52,29 @@
 6. 记录：调用 writing-agents → 写CHANGELOG.md + 经验教训到AGENTS.md
 7. 提交：调用 finishing-a-development-branch → 分组提交
 
+## CLI 参数参考
+
+| 参数 | 默认值 | embed | extract | 说明 |
+|------|--------|-------|---------|------|
+| `image` (位置1) | 必填 | ✓ | ✓ | 原图/含水印图路径 |
+| `watermark` (位置2) | 必填 | ✓ | — | 水印文字或图片路径 |
+| `output` (位置3) | `embedded.png` | ✓ | — | 输出路径 |
+| `wm_shape` (位置2) | 必填 | — | ✓ | 水印形状，`"111"` 或 `"64,64"` |
+| `-o, --output` | None | — | ✓ | 提取结果输出（img 模式） |
+| `--pwd-img` | 1 | ✓ | ✓ | 图片密码：DCT 系数打乱种子 |
+| `--pwd-wm` | 1 | ✓ | ✓ | 水印密码：bit 序列打乱种子 |
+| `--wm-mode` | auto | ✓ | ✓ | str / img / bit |
+| `--block-shape` | 4 4 | ✓ | ✓ | DCT 块大小 |
+| `-c, --compress` | None | ✓ | — | JPEG 压缩率 0-100 |
+| `--processes` | None | ✓ | ✓ | 并行进程数 |
+| `--core-mode` | common | ✓ | ✓ | 核心模式 |
+
 ## 经验/坑点
+
+- **editable install .pth 编码**：uv 生成 `.pth` 用 UTF-8，但 CPython `site.py` 用 locale 编码读取。中文 Windows（locale=GBK）下含中文的路径会乱码 → `sys.path` 缺项 → entry point `ModuleNotFoundError`。修复：把 `.pth` 文件用 GBK 重写。Python 3.13 无此问题。
+- **optparse 已废弃**：CLI 工具需用 argparse，子命令模式更清晰。
+- **entry point exe 调试**：zipapp exe 内容可通过 `zipfile.ZipFile('xxx.exe').read('__main__.py')` 查看。
+- **uv sync --no-dev 会卸载 dev 包**：验证时不带 dev 需注意 ipykernel 等会被移除。
+- **pwd-img vs pwd-wm**：两个独立密码种子。pwd-img 打乱 DCT 系数顺序（藏哪里），pwd-wm 打乱水印 bit 序列（怎么藏）。任何一个不对都提取失败。
+- **wm_shape 格式**：字符串/bit 模式填整数如 `111`；图片模式填 `宽,高` 如 `64,64`。嵌入时会打印 bit 长度，提取时原样填回。
+- **README 需同步 CLI 变更**：改 CLI 后要更新 README 的命令行示例和参数说明，这是用户第一入口。
