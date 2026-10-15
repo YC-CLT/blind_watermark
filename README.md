@@ -65,7 +65,7 @@ blind_watermark embed --wm-mode bit ori_img.jpeg "True,False,True,True" embedded
 blind_watermark extract embedded.png 111
 
 # 提取图片：wm_shape 填 宽,高
-blind_watermark extract embedded.png 64,64 -o extracted_wm.png
+blind_watermark extract --wm-mode img embedded.png 64,64 -o extracted_wm.png
 
 # 提取二进制
 blind_watermark extract --wm-mode bit embedded.png 6

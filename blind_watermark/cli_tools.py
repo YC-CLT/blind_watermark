@@ -68,6 +68,8 @@ def _resolve_wm_mode(args):
         import os
         if os.path.isfile(args.watermark):
             return 'img'
+    if hasattr(args, 'output') and args.output:
+        return 'img'
     return 'str'
 
 

@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2026-10-15 — Bug 修复：extract 模式检测 + 中文路径支持
+
+- **修复 `_resolve_wm_mode`**：extract 命令带 `-o` 时自动检测为 `img` 模式，不再错误回退 `str` 导致输出被忽略
+- **修复中文路径**：`fft_watermark.py` 和 `blind_watermark.py` 的 `cv2.imread`/`cv2.imwrite` 全部替换为 `np.fromfile` + `cv2.imdecode`/`cv2.imencode` 方案，支持含中文的绝对路径
+- **README**：extract 图片示例加上 `--wm-mode img`（虽然修复后不再必填，但显式指定更安全）
+- **测试**：53 passed, 0 failed
+
 ## 2026-10-15 — FFT ref 等价性验证 & 测试修复
 
 - **等价性验证**: `fft_core.py` decode 结尾截断行为对齐 ref 原版 — `np.uint8()` 逐像素赋值替代 `np.clip(0,255)` 统一钳制，像素级 diff = 0

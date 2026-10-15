@@ -73,4 +73,6 @@
 - **FFT 算法提取需原图**：与 DWT 不同，`fft decode` 必须提供原图，否则无法反演 `(FFT(含水印) - FFT(原图)) / alpha`。read_img 中的 "原图" 语义对 FFT 是干净的原始图像。
 - **FFT oldseed 双重要求**：仅 `random.seed(seed, version=1)` 不够，Py3 的 `random.shuffle` 实现也变了，必须用自定义 `_old_shuffle` 完全模拟 Py2 行为。
 - **np.uint8 截断 vs np.clip 钳制**：FFT decode 中 `rwm` 值为 float64，可能超出 [0,255]。`np.clip(x, 0, 255)` 钳制溢出值到边界再转 uint8，`np.uint8(x)` 直接模 256 截断（类似 C 的 `(uint8_t)x`），二者结果不同。Ref 原版用逐像素 `np.uint8(rwm[i][j])`，要保持兼容必须一致。
-- **cv2.imread 中文路径**：OpenCV 的 `cv2.imread` 对含中文的绝对路径返回 None，但相对路径正常（Windows 下）。规避：`open(path, 'rb')` + `np.frombuffer` + `cv2.imdecode`；写出同理用 `cv2.imencode` + `buf.tofile(path)`。
+- **cv2.imread 中文路径**：OpenCV 的 `cv2.imread` 对含中文的绝对路径返回 None。已修复：`fft_watermark.py` 和 `blind_watermark.py` 使用 `np.fromfile` + `cv2.imdecode`（读）和 `cv2.imencode` + `buf.tofile`（写）替代，无需依赖相对路径。
+- **`_resolve_wm_mode` 对 extract 不生效**：`extract` 的 args 无 `watermark` 属性，自动检测永远回退 `str`，导致 `-o` 被忽略。修复：检测 `args.output` 存在时返回 `img`。
+- **`np.fromfile` 异常消息不同**：原 `cv2.imread` 缺文件返回 None → `FileNotFoundError("can't find")`。改用 `np.fromfile` 后缺文件抛 `FileNotFoundError: [Errno 2] No such file or directory`，需 try/except 统一消息，否则测试 `match="can't find"` 失败。

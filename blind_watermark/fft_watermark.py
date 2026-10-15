@@ -3,6 +3,24 @@ import numpy as np
 from .fft_core import fft_encode, fft_decode
 
 
+def _imread(path):
+    try:
+        buf = np.fromfile(path, dtype=np.uint8)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"can't find {path}")
+    img = cv2.imdecode(buf, cv2.IMREAD_UNCHANGED)
+    if img is None:
+        raise FileNotFoundError(f"can't find {path}")
+    return img
+
+
+def _imwrite(path, img):
+    ext = '.' + path.rsplit('.', 1)[-1]
+    success, buf = cv2.imencode(ext, img)
+    if success:
+        buf.tofile(path)
+
+
 class WaterMarkFFT:
 
     def __init__(self, seed=20160930, alpha=3.0, oldseed=False):
@@ -11,27 +29,19 @@ class WaterMarkFFT:
         self.oldseed = oldseed
 
     def encode(self, img_file, wm_file, output):
-        img = cv2.imread(img_file)
-        if img is None:
-            raise FileNotFoundError(f"can't find {img_file}")
-        wm = cv2.imread(wm_file)
-        if wm is None:
-            raise FileNotFoundError(f"can't find {wm_file}")
+        img = _imread(img_file)
+        wm = _imread(wm_file)
 
         result = self.encode_arr(img, wm)
-        cv2.imwrite(output, result)
+        _imwrite(output, result)
         return result
 
     def decode(self, img_file, img_wm_file, output):
-        img = cv2.imread(img_file)
-        if img is None:
-            raise FileNotFoundError(f"can't find {img_file}")
-        img_wm = cv2.imread(img_wm_file)
-        if img_wm is None:
-            raise FileNotFoundError(f"can't find {img_wm_file}")
+        img = _imread(img_file)
+        img_wm = _imread(img_wm_file)
 
         result = self.decode_arr(img, img_wm)
-        cv2.imwrite(output, result)
+        _imwrite(output, result)
         return result
 
     def encode_arr(self, img, wm):
