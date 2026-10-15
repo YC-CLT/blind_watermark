@@ -42,5 +42,9 @@ packages = ["blind_watermark"]
 
 [dependency-groups]
 dev = [
-    "ipykernel",
+    "pytest>=7",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
