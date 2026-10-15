@@ -11,17 +11,23 @@
 | 文件 | 作用 |
 |------|------|
 | `pyproject.toml` | uv 项目配置、依赖、entry point、pytest 配置 |
-| `blind_watermark/blind_watermark.py` | WaterMark 主类，embed/extract 入口 |
-| `blind_watermark/bwm_core.py` | 盲水印核心算法 |
-| `blind_watermark/cli_tools.py` | CLI 命令行工具 |
-| `tests/conftest.py` | 共享 pytest fixture（ori_img, wm_img, default_bwm...） |
-| `tests/test_integration.py` | 全链路集成测试（embed→extract） |
+| `blind_watermark/blind_watermark.py` | WaterMark 主类，embed/extract 入口（DWT） |
+| `blind_watermark/bwm_core.py` | DWT-DCT-SVD 盲水印核心算法 |
+| `blind_watermark/cli_tools.py` | CLI 命令行工具（embed/extract + fft encode/decode） |
+| `blind_watermark/fft_core.py` | FFT 空域水印核心算法（fft_encode/fft_decode） |
+| `blind_watermark/fft_watermark.py` | WaterMarkFFT 类，FFT 文件 I/O 封装 |
+| `blind_watermark/att.py` | 6 种攻击模拟 |
+| `blind_watermark/recover.py` | 裁剪还原 |
+| `tests/conftest.py` | 共享 pytest fixture（ori_img, wm_img, default_bwm, default_fft...） |
+| `tests/test_integration.py` | DWT 全链路集成测试（embed→extract） |
 
 ## 关键常量
 
 | 常量 | 位置 | 说明 |
 |------|------|------|
 | `__version__` | `blind_watermark/version.py` | 版本号，pyproject.toml 中需同步 |
+| `seed=20160930` | `blind_watermark/fft_core.py` | FFT 水印默认随机种子 |
+| `alpha=3.0` | `blind_watermark/fft_core.py` | FFT 水印默认嵌入强度 |
 
 ## 规则
 
@@ -64,3 +70,5 @@
 - **pwd-img vs pwd-wm**：两个独立密码种子。pwd-img 打乱 DCT 系数顺序（藏哪里），pwd-wm 打乱水印 bit 序列（怎么藏）。任何一个不对都提取失败。
 - **wm_shape 格式**：字符串/bit 模式填整数如 `111`；图片模式填 `宽,高` 如 `64,64`。嵌入时会打印 bit 长度，提取时原样填回。
 - **README 需同步 CLI 变更**：改 CLI 后要更新 README 的命令行示例和参数说明，这是用户第一入口。
+- **FFT 算法提取需原图**：与 DWT 不同，`fft decode` 必须提供原图，否则无法反演 `(FFT(含水印) - FFT(原图)) / alpha`。read_img 中的 "原图" 语义对 FFT 是干净的原始图像。
+- **FFT oldseed 双重要求**：仅 `random.seed(seed, version=1)` 不够，Py3 的 `random.shuffle` 实现也变了，必须用自定义 `_old_shuffle` 完全模拟 Py2 行为。

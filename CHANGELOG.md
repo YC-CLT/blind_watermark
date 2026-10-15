@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 2026-10-15 — FFT 空域水印集成
+
+- **新后端**: 集成 [BlindWaterMark](https://github.com/fire-keeper/BlindWaterMark) 的 FFT 空域水印算法，与现有 DWT-DCT-SVD 频域水印并行
+- **fft_core.py**: 纯函数算法层，`fft_encode`/`fft_decode`，含 Py2 兼容的 `_old_shuffle`
+- **WaterMarkFFT 类**: 文件 I/O 封装，`encode`/`decode` API（提取需原图）
+- **CLI**: `fft encode` / `fft decode` 子命令，支持 `--seed`、`--alpha`、`--oldseed` 参数
+- **测试**: 15 个新用例（8 核心 + 7 集成），覆盖 oldseed 往返、错误种子、文件不存在、尺寸约束
+- **测试总计数**: 53 passed, 0 failed
+- **DWT 现有代码**: 零改动，零回归
+
 ## 2026-10-15 — 测试体系搭建 + README 精简
 
 - **测试框架**: pytest>=7 加入 dev 依赖，`pyproject.toml` 新增 `[tool.pytest.ini_options]`
