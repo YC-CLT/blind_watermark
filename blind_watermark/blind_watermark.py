@@ -18,10 +18,13 @@ def _imread(path, flags=cv2.IMREAD_UNCHANGED):
 
 
 def _imwrite(path, img, params=None):
+    if path is None:
+        return False
     ext = '.' + path.rsplit('.', 1)[-1]
     success, buf = cv2.imencode(ext, img, params or [])
     if success:
         buf.tofile(path)
+    return success
 
 
 class WaterMark:
