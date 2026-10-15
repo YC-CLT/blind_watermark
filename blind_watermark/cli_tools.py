@@ -1,5 +1,6 @@
 import argparse
 from .blind_watermark import WaterMark
+from .fft_watermark import WaterMarkFFT
 
 
 def cmd_embed(args):
@@ -124,12 +125,56 @@ def main():
     _add_common_args(p_extract)
     p_extract.set_defaults(func=cmd_extract)
 
+    p_fft = sub.add_parser('fft', help='FFT spatial-domain watermark (BlindWaterMark compatible)')
+    fft_sub = p_fft.add_subparsers(dest='fft_command', title='fft commands')
+
+    p_fft_encode = fft_sub.add_parser('encode', help='Embed watermark into image')
+    p_fft_encode.add_argument('image', help='Path to original image')
+    p_fft_encode.add_argument('watermark', help='Path to watermark image')
+    p_fft_encode.add_argument('output', help='Output image path')
+    p_fft_encode.add_argument('--seed', type=int, default=20160930,
+                              help='Random seed (default: 20160930)')
+    p_fft_encode.add_argument('--alpha', type=float, default=3.0,
+                              help='Watermark strength (default: 3.0)')
+    p_fft_encode.add_argument('--oldseed', action='store_true',
+                              help='Python 2 compatible random algorithm')
+    p_fft_encode.set_defaults(func=cmd_fft_encode)
+
+    p_fft_decode = fft_sub.add_parser('decode', help='Extract watermark from image (requires original)')
+    p_fft_decode.add_argument('image', help='Path to original (clean) image')
+    p_fft_decode.add_argument('watermarked', help='Path to watermarked image')
+    p_fft_decode.add_argument('output', help='Output watermark image path')
+    p_fft_decode.add_argument('--seed', type=int, default=20160930,
+                              help='Random seed used during encoding (default: 20160930)')
+    p_fft_decode.add_argument('--alpha', type=float, default=3.0,
+                              help='Watermark strength used during encoding (default: 3.0)')
+    p_fft_decode.add_argument('--oldseed', action='store_true',
+                              help='Python 2 compatible random algorithm')
+    p_fft_decode.set_defaults(func=cmd_fft_decode)
+
     args = parser.parse_args()
+
+    if args.command == 'fft' and args.fft_command is None:
+        p_fft.print_help()
+        return
+
     if args.command is None:
         parser.print_help()
         return
 
     args.func(args)
+
+
+def cmd_fft_encode(args):
+    bwm = WaterMarkFFT(seed=args.seed, alpha=args.alpha, oldseed=args.oldseed)
+    bwm.encode(args.image, args.watermark, args.output)
+    print(f'FFT encode succeed! -> {args.output}')
+
+
+def cmd_fft_decode(args):
+    bwm = WaterMarkFFT(seed=args.seed, alpha=args.alpha, oldseed=args.oldseed)
+    bwm.decode(args.image, args.watermarked, args.output)
+    print(f'FFT decode succeed! -> {args.output}')
 
 
 if __name__ == '__main__':
