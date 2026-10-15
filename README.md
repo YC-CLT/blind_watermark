@@ -40,14 +40,20 @@ blind_watermark extract embedded.png 64,64 -o extracted_wm.png
 blind_watermark embed --help
 ```
 
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `--pwd-img` | 1 | 图片密码：DCT 系数打乱种子 |
-| `--pwd-wm` | 1 | 水印密码：bit 序列打乱种子 |
-| `--block-shape H W` | 4 4 | DCT 块大小 |
-| `--wm-mode` | auto | str / img / bit |
-| `-c, --compress` | None | JPEG 压缩率 0-100 |
-| `--processes` | None | 并行进程数 |
+| 参数 | 默认值 | embed | extract | 说明 |
+|------|--------|-------|---------|------|
+| `image` (位置1) | 必填 | ✓ | ✓ | 原图/含水印图路径 |
+| `watermark` (位置2) | 必填 | ✓ | — | 水印文字或图片路径 |
+| `output` (位置3) | `embedded.png` | ✓ | — | 输出路径 |
+| `wm_shape` (位置2) | 必填 | — | ✓ | 水印形状，`"111"` 或 `"64,64"` |
+| `-o, --output` | None | — | ✓ | 提取结果输出（img 模式） |
+| `--pwd-img` | 1 | ✓ | ✓ | 图片密码：DCT 系数打乱种子 |
+| `--pwd-wm` | 1 | ✓ | ✓ | 水印密码：bit 序列打乱种子 |
+| `--wm-mode` | auto | ✓ | ✓ | str / img / bit |
+| `--block-shape` | 4 4 | ✓ | ✓ | DCT 块大小 |
+| `-c, --compress` | None | ✓ | — | JPEG 压缩率 0-100 |
+| `--processes` | None | ✓ | ✓ | 并行进程数 |
+| `--core-mode` | common | ✓ | ✓ | 核心模式 |
 
 ### 调试模式
 

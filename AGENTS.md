@@ -55,23 +55,6 @@
 6. 记录：调用 writing-agents → 写CHANGELOG.md + 经验教训到AGENTS.md
 7. 提交：调用 finishing-a-development-branch → 分组提交
 
-## CLI 参数参考
-
-| 参数 | 默认值 | embed | extract | 说明 |
-|------|--------|-------|---------|------|
-| `image` (位置1) | 必填 | ✓ | ✓ | 原图/含水印图路径 |
-| `watermark` (位置2) | 必填 | ✓ | — | 水印文字或图片路径 |
-| `output` (位置3) | `embedded.png` | ✓ | — | 输出路径 |
-| `wm_shape` (位置2) | 必填 | — | ✓ | 水印形状，`"111"` 或 `"64,64"` |
-| `-o, --output` | None | — | ✓ | 提取结果输出（img 模式） |
-| `--pwd-img` | 1 | ✓ | ✓ | 图片密码：DCT 系数打乱种子 |
-| `--pwd-wm` | 1 | ✓ | ✓ | 水印密码：bit 序列打乱种子 |
-| `--wm-mode` | auto | ✓ | ✓ | str / img / bit |
-| `--block-shape` | 4 4 | ✓ | ✓ | DCT 块大小 |
-| `-c, --compress` | None | ✓ | — | JPEG 压缩率 0-100 |
-| `--processes` | None | ✓ | ✓ | 并行进程数 |
-| `--core-mode` | common | ✓ | ✓ | 核心模式 |
-
 ## 经验/坑点
 
 - **editable install .pth 编码**：uv 生成 `.pth` 用 UTF-8，但 CPython `site.py` 用 locale 编码读取。中文 Windows（locale=GBK）下含中文的路径会乱码 → `sys.path` 缺项 → entry point `ModuleNotFoundError`。修复：把 `.pth` 文件用 GBK 重写。Python 3.13 无此问题。
