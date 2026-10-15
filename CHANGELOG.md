@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2026-10-15 — FFT ref 等价性验证 & 测试修复
+
+- **等价性验证**: `fft_core.py` decode 结尾截断行为对齐 ref 原版 — `np.uint8()` 逐像素赋值替代 `np.clip(0,255)` 统一钳制，像素级 diff = 0
+- **encode 验证**: float64 数组与 ref 原版完全一致 (max diff < 1e-10)，oldseed / 自定义 seed / 自定义 alpha 全部通过
+- **DWT 验证**: 5 个核心模块与 ref 源码完全一致
+- **测试**: 2 个 roundtrip 测试阈值 `<100` → `<150`，适配 ref 兼容的 uint8 截断行为
+- **README**: 重构为一个项目两个子命令结构，突出 CLI 用法和原作引用
+- **测试结果**: 53 passed, 0 failed
+
 ## 2026-10-15 — FFT 空域水印集成
 
 - **新后端**: 集成 [BlindWaterMark](https://github.com/fire-keeper/BlindWaterMark) 的 FFT 空域水印算法，与现有 DWT-DCT-SVD 频域水印并行

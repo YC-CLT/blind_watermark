@@ -72,3 +72,5 @@
 - **README 需同步 CLI 变更**：改 CLI 后要更新 README 的命令行示例和参数说明，这是用户第一入口。
 - **FFT 算法提取需原图**：与 DWT 不同，`fft decode` 必须提供原图，否则无法反演 `(FFT(含水印) - FFT(原图)) / alpha`。read_img 中的 "原图" 语义对 FFT 是干净的原始图像。
 - **FFT oldseed 双重要求**：仅 `random.seed(seed, version=1)` 不够，Py3 的 `random.shuffle` 实现也变了，必须用自定义 `_old_shuffle` 完全模拟 Py2 行为。
+- **np.uint8 截断 vs np.clip 钳制**：FFT decode 中 `rwm` 值为 float64，可能超出 [0,255]。`np.clip(x, 0, 255)` 钳制溢出值到边界再转 uint8，`np.uint8(x)` 直接模 256 截断（类似 C 的 `(uint8_t)x`），二者结果不同。Ref 原版用逐像素 `np.uint8(rwm[i][j])`，要保持兼容必须一致。
+- **cv2.imread 中文路径**：OpenCV 的 `cv2.imread` 对含中文的绝对路径返回 None，但相对路径正常（Windows 下）。规避：`open(path, 'rb')` + `np.frombuffer` + `cv2.imdecode`；写出同理用 `cv2.imencode` + `buf.tofile(path)`。
