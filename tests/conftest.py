@@ -37,3 +37,22 @@ def default_bwm():
 @pytest.fixture(autouse=True)
 def no_bw_notes():
     bw_notes.close()
+
+
+from blind_watermark.fft_watermark import WaterMarkFFT
+
+
+@pytest.fixture(scope="session")
+def fft_ori_img(ori_img):
+    return ori_img
+
+
+@pytest.fixture(scope="session")
+def fft_wm_img(wm_img):
+    img_3ch = cv2.cvtColor(wm_img, cv2.COLOR_GRAY2BGR)
+    return img_3ch
+
+
+@pytest.fixture
+def default_fft():
+    return WaterMarkFFT(seed=20160930, alpha=3.0)
