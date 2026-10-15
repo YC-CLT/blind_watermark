@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 2026-10-15 — 测试体系搭建 + README 精简
+
+- **测试框架**: pytest>=7 加入 dev 依赖，`pyproject.toml` 新增 `[tool.pytest.ini_options]`
+- **测试套件**: `tests/` 下 8 个测试文件、38 个用例，覆盖版本号/pool/bwm_core/attack/recover/CLI/WaterMark/集成
+- **共享 fixture**: `conftest.py` 提供 `ori_img`、`wm_img`、`default_bwm`、`no_bw_notes` 等
+- **集成测试**: embed→extract 全链路（str/img/bit）、错误密码、JPEG 压缩
+- **README**: 精简聚焦用法，删除攻击效果表格和演示图片，标明项目来源为简单整合
+- **测试结果**: 38 passed, 0 failed
+
 ## 2026-10-13 — WSL cwd 修复
 
 - **问题**：`shell=wsl` + Linux 路径 cwd（如 `/home/kali`）时报 `[WinError 267] 目录名称无效`，因 `subprocess.Popen(cwd=)` 不接受 Linux 路径

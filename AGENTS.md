@@ -10,10 +10,12 @@
 
 | 文件 | 作用 |
 |------|------|
-| `pyproject.toml` | uv 项目配置、依赖、entry point |
+| `pyproject.toml` | uv 项目配置、依赖、entry point、pytest 配置 |
 | `blind_watermark/blind_watermark.py` | WaterMark 主类，embed/extract 入口 |
 | `blind_watermark/bwm_core.py` | 盲水印核心算法 |
 | `blind_watermark/cli_tools.py` | CLI 命令行工具 |
+| `tests/conftest.py` | 共享 pytest fixture（ori_img, wm_img, default_bwm...） |
+| `tests/test_integration.py` | 全链路集成测试（embed→extract） |
 
 ## 关键常量
 
@@ -23,6 +25,7 @@
 
 ## 规则
 
+- **测试命令**: `uv run pytest tests/ -v` 运行全部测试，`uv run pytest tests/test_xxx.py -v` 运行单个文件
 - **CLI 入口点必须有 `if __name__ == '__main__'`**：否则 `python -m` 模式不工作；entry point 虽然能走，但 `-m` 是重要调试通道
 - **只用 pyproject.toml 管依赖**：不要再建 requirements.txt 或 setup.py
 - **block_shape 传参必须 tuple**：argparse 吐出 list，需 `tuple(args.block_shape)` 转换
