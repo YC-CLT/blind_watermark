@@ -1,8 +1,14 @@
+[中文](#中文) | [English](#english)
+
+---
+
+<a id="中文"></a>
+
 # blind-watermark
 
-数字盲水印工具，集成了两种互补的算法，覆盖 CTF 常见题型。
+盲水印隐写工具，集成了两种互补的算法，覆盖 CTF 常见题型。
 
-本项目整合了两个开源项目：
+本项目是对两个开源项目的简单整合和优化，没有修改任何核心算法：
 
 | 算法 | 来源 | 作者 |
 |------|------|------|
@@ -151,3 +157,161 @@ bwm.decode('ori.png', 'output.png', 'extracted.png')
 | `.decode(原图, 含水印图, 输出)` | 提取（需原图） |
 | `.encode_arr(img, wm)` | 数组版嵌入 |
 | `.decode_arr(img, img_wm)` | 数组版提取 |
+
+---
+
+<a id="english"></a>
+
+# blind-watermark
+
+A blind watermark steganography tool integrating two complementary algorithms for common CTF challenges.
+
+This project is a simple integration and optimization of two open-source projects. No core algorithms have been modified:
+
+| Algorithm | Source | Author |
+|------|------|------|
+| DWT-DCT-SVD frequency-domain | [blind_watermark](https://github.com/guofei9987/blind_watermark) | [@guofei9987](https://github.com/guofei9987) |
+| FFT spatial-domain | [BlindWaterMark](https://github.com/fire-keeper/BlindWaterMark) | [@fire-keeper](https://github.com/fire-keeper) |
+
+## Installation
+
+```bash
+uv sync
+uv tool install -e .
+```
+
+## Quick Comparison
+
+| | embed / extract | fft encode / decode |
+|------|------|------|
+| Algorithm | DWT-DCT-SVD frequency-domain | FFT spatial-domain |
+| Needs original image | No | **Yes** |
+| Watermark format | Text / Image / Binary | Image only |
+| Robustness | Strong (anti-rotation/crop/scale) | Weak |
+| Typical scenario | Extract text from single image | Extract image watermark given original + watermarked |
+
+---
+
+## Subcommands
+
+### `embed` — Embed watermark
+
+```bash
+# Embed string
+blind_watermark embed ori_img.jpeg "Hello World" embedded.png
+
+# Embed image path
+blind_watermark embed ori_img.jpeg watermark.png embedded.png
+
+# Embed binary
+blind_watermark embed --wm-mode bit ori_img.jpeg "True,False,True,True" embedded.png
+```
+
+| Argument | Default | Description |
+|------|--------|------|
+| `image` | required | Path to original image |
+| `watermark` | required | Watermark text, or path to watermark image |
+| `output` | `embedded.png` | Output image path |
+| `--wm-mode` | auto-detect | `str` / `img` / `bit` |
+| `-c, --compress` | None | JPEG compression ratio 0-100 |
+| `--pwd-img` | 1 | Image password: DCT coefficient shuffle seed |
+| `--pwd-wm` | 1 | Watermark password: bit sequence shuffle seed |
+| `--block-shape` | 4 4 | DCT block size (height width) |
+| `--core-mode` | common | Core mode |
+| `--processes` | None | Number of parallel processes |
+
+> When embedding a string, the command prints the watermark bit length, which is needed for extraction.
+
+### `extract` — Extract watermark
+
+```bash
+# Extract string: wm_shape = bit length printed during embed
+blind_watermark extract embedded.png 111
+
+# Extract image: wm_shape = width,height
+blind_watermark extract --wm-mode img embedded.png 64,64 -o extracted_wm.png
+
+# Extract binary
+blind_watermark extract --wm-mode bit embedded.png 6
+```
+
+| Argument | Default | Description |
+|------|--------|------|
+| `image` | required | Path to watermarked image |
+| `wm_shape` | required | Watermark shape: `"111"` (bit length) or `"64,64"` (width,height) |
+| `-o, --output` | None | Output watermark image path (img mode) |
+| `--wm-mode` | auto-detect | `str` / `img` / `bit` |
+| `--pwd-img` | 1 | Image password, must match embed |
+| `--pwd-wm` | 1 | Watermark password, must match embed |
+| `--block-shape` | 4 4 | Must match embed |
+| `--core-mode` | common | Core mode |
+| `--processes` | None | Number of parallel processes |
+
+---
+
+### `fft` — FFT spatial-domain watermark
+
+Compatible with [BlindWaterMark](https://github.com/fire-keeper/BlindWaterMark). Original image is required for extraction.
+
+Subcommands: `fft encode` / `fft decode`
+
+```bash
+# Embed
+blind_watermark fft encode ori.png wm.png output.png
+
+# Extract (original image required!)
+blind_watermark fft decode ori.png output.png extracted_wm.png
+
+# Custom seed and strength
+blind_watermark fft encode ori.png wm.png out.png --seed 12345678 --alpha 5.0
+blind_watermark fft decode ori.png out.png wm.png --seed 12345678 --alpha 5.0
+
+# Python 2 compatibility mode (for legacy BlindWaterMark compatibility)
+blind_watermark fft decode ori.png out.png wm.png --oldseed
+```
+
+| Argument | Default | Applies to | Description |
+|------|--------|------|------|
+| `image` | required | encode / decode | Path to original image |
+| `watermark` | required | encode | Path to watermark image |
+| `watermarked` | required | decode | Path to watermarked image |
+| `output` | required | encode / decode | Output path |
+| `--seed` | 20160930 | encode / decode | Random seed, must match between encode and decode |
+| `--alpha` | 3.0 | encode / decode | Watermark strength, must match between encode and decode |
+| `--oldseed` | False | encode / decode | Python 2 compatible random algorithm |
+
+---
+
+## Python API
+
+### WaterMark (DWT)
+
+```python
+from blind_watermark import WaterMark
+
+bwm = WaterMark(password_img=1, password_wm=1)
+bwm.read_img('ori_img.jpeg')
+bwm.read_wm('Hello World', mode='str')
+bwm.embed('embedded.png')
+
+# Extract
+bwm1 = WaterMark(password_img=1, password_wm=1)
+result = bwm1.extract('embedded.png', wm_shape=111, mode='str')
+```
+
+### WaterMarkFFT (FFT)
+
+```python
+from blind_watermark import WaterMarkFFT
+
+bwm = WaterMarkFFT(seed=20160930, alpha=3.0)
+bwm.encode('ori.png', 'wm.png', 'output.png')
+bwm.decode('ori.png', 'output.png', 'extracted.png')
+```
+
+| Method | Description |
+|------|------|
+| `.encode(original, watermark, output)` | Embed |
+| `.decode(original, watermarked, output)` | Extract (needs original) |
+| `.encode_arr(img, wm)` | Embed via numpy arrays |
+| `.decode_arr(img, img_wm)` | Extract via numpy arrays |

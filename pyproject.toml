@@ -31,8 +31,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/guofei9987/blind_watermark"
-Repository = "https://github.com/guofei9987/blind_watermark"
+Homepage = "https://github.com/YC-CLT/blind_watermark"
+Repository = "https://github.com/YC-CLT/blind_watermark"
 
 [project.scripts]
 blind_watermark = "blind_watermark.cli_tools:main"
