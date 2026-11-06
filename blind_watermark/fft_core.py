@@ -27,7 +27,7 @@ def _shuffle_args(h, w, seed, oldseed):
     return m, n
 
 
-def fft_encode(img, wm, seed=20160930, alpha=3.0, oldseed=False):
+def fft_encode(img, wm, seed=20160930, alpha=3.0, oldseed=False, legacy=False):
     img = img.astype(np.float64)
     wm = wm.astype(np.float64)
 
@@ -56,7 +56,10 @@ def fft_encode(img, wm, seed=20160930, alpha=3.0, oldseed=False):
     rwm[:half_H, :W] = hwm
     for i in range(half_H):
         for j in range(W):
-            rwm[H - i - 1, W - j - 1] = hwm[i, j]
+            if legacy:
+                rwm[H - i - 1, W - j - 1] = hwm[i, j]
+            else:
+                rwm[(H - i) % H, (W - j) % W] = hwm[i, j]
 
     f1 = np.fft.fft2(img)
     f2 = f1 + alpha * rwm
@@ -65,7 +68,7 @@ def fft_encode(img, wm, seed=20160930, alpha=3.0, oldseed=False):
     return img_wm
 
 
-def fft_decode(img, img_wm, seed=20160930, alpha=3.0, oldseed=False):
+def fft_decode(img, img_wm, seed=20160930, alpha=3.0, oldseed=False, legacy=False):
     img = img.astype(np.float64)
     img_wm = img_wm.astype(np.float64)
 
@@ -84,6 +87,9 @@ def fft_decode(img, img_wm, seed=20160930, alpha=3.0, oldseed=False):
             wm_out[m[i], n[j]] = np.uint8(rwm[i, j])
     for i in range(half_H):
         for j in range(W):
-            wm_out[H - i - 1, W - j - 1] = wm_out[i, j]
+            if legacy:
+                wm_out[H - i - 1, W - j - 1] = wm_out[i, j]
+            else:
+                wm_out[(H - i) % H, (W - j) % W] = wm_out[i, j]
 
     return wm_out

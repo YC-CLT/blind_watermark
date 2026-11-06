@@ -140,6 +140,8 @@ def main():
                               help='Watermark strength (default: 3.0)')
     p_fft_encode.add_argument('--oldseed', action='store_true',
                               help='Python 2 compatible random algorithm')
+    p_fft_encode.add_argument('--legacy', action='store_true',
+                              help='Use legacy (buggy) Hermitian symmetry for compatibility')
     p_fft_encode.set_defaults(func=cmd_fft_encode)
 
     p_fft_decode = fft_sub.add_parser('decode', help='Extract watermark from image (requires original)')
@@ -152,6 +154,8 @@ def main():
                               help='Watermark strength used during encoding (default: 3.0)')
     p_fft_decode.add_argument('--oldseed', action='store_true',
                               help='Python 2 compatible random algorithm')
+    p_fft_decode.add_argument('--legacy', action='store_true',
+                              help='Use legacy (buggy) Hermitian symmetry for compatibility')
     p_fft_decode.set_defaults(func=cmd_fft_decode)
 
     args = parser.parse_args()
@@ -168,13 +172,13 @@ def main():
 
 
 def cmd_fft_encode(args):
-    bwm = WaterMarkFFT(seed=args.seed, alpha=args.alpha, oldseed=args.oldseed)
+    bwm = WaterMarkFFT(seed=args.seed, alpha=args.alpha, oldseed=args.oldseed, legacy=args.legacy)
     bwm.encode(args.image, args.watermark, args.output)
     print(f'FFT encode succeed! -> {args.output}')
 
 
 def cmd_fft_decode(args):
-    bwm = WaterMarkFFT(seed=args.seed, alpha=args.alpha, oldseed=args.oldseed)
+    bwm = WaterMarkFFT(seed=args.seed, alpha=args.alpha, oldseed=args.oldseed, legacy=args.legacy)
     bwm.decode(args.image, args.watermarked, args.output)
     print(f'FFT decode succeed! -> {args.output}')
 

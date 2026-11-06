@@ -23,10 +23,11 @@ def _imwrite(path, img):
 
 class WaterMarkFFT:
 
-    def __init__(self, seed=20160930, alpha=3.0, oldseed=False):
+    def __init__(self, seed=20160930, alpha=3.0, oldseed=False, legacy=False):
         self.seed = seed
         self.alpha = alpha
         self.oldseed = oldseed
+        self.legacy = legacy
 
     def encode(self, img_file, wm_file, output):
         img = _imread(img_file)
@@ -45,8 +46,8 @@ class WaterMarkFFT:
         return result
 
     def encode_arr(self, img, wm):
-        result = fft_encode(img, wm, self.seed, self.alpha, self.oldseed)
+        result = fft_encode(img, wm, self.seed, self.alpha, self.oldseed, self.legacy)
         return np.clip(result, 0, 255).astype(np.uint8)
 
     def decode_arr(self, img, img_wm):
-        return fft_decode(img, img_wm, self.seed, self.alpha, self.oldseed)
+        return fft_decode(img, img_wm, self.seed, self.alpha, self.oldseed, self.legacy)
