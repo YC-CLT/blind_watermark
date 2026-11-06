@@ -76,3 +76,38 @@ def test_fft_encode_rejects_watermark_wider_than_image(ori_img):
     too_wide = np.zeros((10, ori_img.shape[1] + 1, 3), dtype=np.uint8)
     with pytest.raises(AssertionError):
         fft_encode(ori_img, too_wide, seed=42)
+
+
+def test_fft_encode_decode_legacy_roundtrip(ori_img, wm_img):
+    """legacy=True 保持修复前的行为，encode→decode 自洽"""
+    wm_3ch = np.stack([wm_img] * 3, axis=-1)
+    encoded = fft_encode(ori_img, wm_3ch, seed=42, alpha=3.0, legacy=True)
+    decoded = fft_decode(ori_img, encoded, seed=42, alpha=3.0, legacy=True)
+    decoded_region = decoded[:wm_3ch.shape[0], :wm_3ch.shape[1]]
+    assert np.mean(np.abs(decoded_region.astype(float) - wm_3ch.astype(float))) < 100
+
+
+def test_fft_legacy_vs_nonlegacy_encode_differs(ori_img, wm_img):
+    """legacy=False 与 legacy=True 应产生不同编码图像"""
+    wm_3ch = np.stack([wm_img] * 3, axis=-1)
+    enc_new = fft_encode(ori_img, wm_3ch, seed=42, alpha=3.0, legacy=False)
+    enc_old = fft_encode(ori_img, wm_3ch, seed=42, alpha=3.0, legacy=True)
+    assert not np.allclose(enc_new, enc_old), "两种模式应产生不同编码图像"
+
+
+def test_fft_legacy_and_nonlegacy_extract_same_from_own_encoded(ori_img, wm_img):
+    """legacy 与 non-legacy 各自编码后用自己的解码器，提取质量应一致"""
+    wm_3ch = np.stack([wm_img] * 3, axis=-1)
+    enc_new = fft_encode(ori_img, wm_3ch, seed=42, alpha=3.0, legacy=False)
+    dec_new = fft_decode(ori_img, enc_new, seed=42, alpha=3.0, legacy=False)
+    enc_old = fft_encode(ori_img, wm_3ch, seed=42, alpha=3.0, legacy=True)
+    dec_old = fft_decode(ori_img, enc_old, seed=42, alpha=3.0, legacy=True)
+    new_crop = dec_new[:wm_3ch.shape[0], :wm_3ch.shape[1]]
+    old_crop = dec_old[:wm_3ch.shape[0], :wm_3ch.shape[1]]
+    diff_new = np.mean(np.abs(new_crop.astype(float) - wm_3ch.astype(float)))
+    diff_old = np.mean(np.abs(old_crop.astype(float) - wm_3ch.astype(float)))
+    assert diff_new < 100
+    assert diff_old < 100
+    assert np.allclose(new_crop, old_crop, atol=1), (
+        f"两种模式的提取结果应相同，diff_new={diff_new}, diff_old={diff_old}"
+    )
