@@ -110,6 +110,9 @@ blind_watermark fft decode ori.png out.png wm.png --seed 12345678 --alpha 5.0
 
 # Python 2 兼容模式（与旧版 BlindWaterMark 交互时使用）
 blind_watermark fft decode ori.png out.png wm.png --oldseed
+
+# 旧版厄米对称（与 v0.4.4 及之前版本兼容）
+blind_watermark fft decode ori.png out.png wm.png --legacy
 ```
 
 | 参数 | 默认值 | 适用 | 说明 |
@@ -121,6 +124,7 @@ blind_watermark fft decode ori.png out.png wm.png --oldseed
 | `--seed` | 20160930 | encode / decode | 随机种子，加解密必须一致 |
 | `--alpha` | 3.0 | encode / decode | 水印强度，加解密必须一致 |
 | `--oldseed` | False | encode / decode | Python 2 兼容随机算法 |
+| `--legacy` | False | encode / decode | 旧版厄米对称算法（有 bug，仅兼容用） |
 
 ---
 
@@ -149,10 +153,14 @@ from blind_watermark import WaterMarkFFT
 bwm = WaterMarkFFT(seed=20160930, alpha=3.0)
 bwm.encode('ori.png', 'wm.png', 'output.png')
 bwm.decode('ori.png', 'output.png', 'extracted.png')
+
+# Python 2 兼容 + 旧版厄米对称
+bwm_legacy = WaterMarkFFT(seed=20160930, alpha=3.0, oldseed=True, legacy=True)
 ```
 
 | 方法 | 说明 |
 |------|------|
+| `WaterMarkFFT(seed, alpha, oldseed, legacy)` | 构造函数 |
 | `.encode(原图, 水印图, 输出)` | 嵌入 |
 | `.decode(原图, 含水印图, 输出)` | 提取（需原图） |
 | `.encode_arr(img, wm)` | 数组版嵌入 |
@@ -268,6 +276,9 @@ blind_watermark fft decode ori.png out.png wm.png --seed 12345678 --alpha 5.0
 
 # Python 2 compatibility mode (for legacy BlindWaterMark compatibility)
 blind_watermark fft decode ori.png out.png wm.png --oldseed
+
+# Legacy Hermitian symmetry (compatible with v0.4.4 and earlier)
+blind_watermark fft decode ori.png out.png wm.png --legacy
 ```
 
 | Argument | Default | Applies to | Description |
@@ -279,6 +290,7 @@ blind_watermark fft decode ori.png out.png wm.png --oldseed
 | `--seed` | 20160930 | encode / decode | Random seed, must match between encode and decode |
 | `--alpha` | 3.0 | encode / decode | Watermark strength, must match between encode and decode |
 | `--oldseed` | False | encode / decode | Python 2 compatible random algorithm |
+| `--legacy` | False | encode / decode | Legacy Hermitian symmetry algorithm (buggy, for compat only) |
 
 ---
 
@@ -307,10 +319,14 @@ from blind_watermark import WaterMarkFFT
 bwm = WaterMarkFFT(seed=20160930, alpha=3.0)
 bwm.encode('ori.png', 'wm.png', 'output.png')
 bwm.decode('ori.png', 'output.png', 'extracted.png')
+
+# Python 2 compat + legacy Hermitian symmetry
+bwm_legacy = WaterMarkFFT(seed=20160930, alpha=3.0, oldseed=True, legacy=True)
 ```
 
 | Method | Description |
 |------|------|
+| `WaterMarkFFT(seed, alpha, oldseed, legacy)` | Constructor |
 | `.encode(original, watermark, output)` | Embed |
 | `.decode(original, watermarked, output)` | Extract (needs original) |
 | `.encode_arr(img, wm)` | Embed via numpy arrays |
