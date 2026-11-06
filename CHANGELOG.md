@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2026-11-06 — FFT 厄米对称 off-by-one 修复
+
+- **问题**: `fft_encode`/`fft_decode` 中构造厄米共轭对称用 `H-i-1` 而非 `(H-i)%H`，i=0 时把 DC 分量映射到错误位置
+- **修复**: 默认走正确公式 `(H-i)%H` / `(W-j)%W`，追加 `legacy=False` 参数；`legacy=True` 可显式启用旧行为
+- **透传链路**: `WaterMarkFFT.__init__` → `encode_arr`/`decode_arr`；CLI `fft encode/decode --legacy`
+- **测试**: 新增 legacy 自洽、编码差异测试；全项目 59/59 PASS
+
 ## 2026-10-15 — Bug 修复：extract 模式检测 + 中文路径支持
 
 - **修复 `_resolve_wm_mode`**：extract 命令带 `-o` 时自动检测为 `img` 模式，不再错误回退 `str` 导致输出被忽略
