@@ -76,3 +76,4 @@
 - **cv2.imread 中文路径**：OpenCV 的 `cv2.imread` 对含中文的绝对路径返回 None。已修复：`fft_watermark.py` 和 `blind_watermark.py` 使用 `np.fromfile` + `cv2.imdecode`（读）和 `cv2.imencode` + `buf.tofile`（写）替代，无需依赖相对路径。
 - **`_resolve_wm_mode` 对 extract 不生效**：`extract` 的 args 无 `watermark` 属性，自动检测永远回退 `str`，导致 `-o` 被忽略。修复：检测 `args.output` 存在时返回 `img`。
 - **`np.fromfile` 异常消息不同**：原 `cv2.imread` 缺文件返回 None → `FileNotFoundError("can't find")`。改用 `np.fromfile` 后缺文件抛 `FileNotFoundError: [Errno 2] No such file or directory`，需 try/except 统一消息，否则测试 `match="can't find"` 失败。
+- **FFT 厄米对称 off-by-one (2026-11-06)**：原实现 `rwm[H-i-1, W-j-1] = hwm[i,j]` 把第 0 行共轭写到第 H-1 行而非第 0 行自身，破坏 FFT 实信号的厄米对称性。正确公式是 `rwm[(H-i)%H, (W-j)%W] = hwm[i,j]`。但 roundtrip 自洽（编码/解码用同一错误公式），所以提取质量无明显差异——差异主要体现在 IFFT 的虚部丢弃损失和与其他库的互操作。修复：加 `legacy=False` 参数切换，默认走正确路径。验证方式：`test_fft_legacy_vs_nonlegacy_encode_differs` 确认编码输出不同。
